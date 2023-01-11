@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -62,5 +63,17 @@ public class PersonServiceTests {
 
     assertEquals("Text '2000/01/01' could not be parsed at index 2", exception.getMessage());
     assertNotNull(exception);
+    verify(repo, times(0)).save(any(Person.class));
+  }
+
+  @Test
+  @DisplayName("List Person test: Should return a empty list")
+  void should_return_a_empty_person_list() {
+    when(this.repo.findAll()).thenReturn(new ArrayList<Person>());
+
+    int personListSize = this.service.listPerson().size();
+
+    assertEquals(0, personListSize);
+    verify(repo, times(1)).findAll();
   }
 }

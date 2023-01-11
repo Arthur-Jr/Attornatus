@@ -22,6 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 
 @WebMvcTest(PersonController.class)
 @DisplayName("Person controller:")
@@ -104,6 +105,17 @@ public class PersonControllerTests {
     response.andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.message").value(ErrorMessages.invalidDateFormat));
+  }
+
+  @Test
+  @DisplayName("List person test: Should return a empty list with status code 200")
+  void should_return_a_empty_list_with_statuscode_200() throws Exception {
+    when(this.service.listPerson()).thenReturn(new ArrayList<Person>());
+
+    this.mock.perform(get("/person"))
+    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+    .andExpect(status().isOk())
+    .andExpect(jsonPath("$.size()").value(0));;
   }
 
   /*
