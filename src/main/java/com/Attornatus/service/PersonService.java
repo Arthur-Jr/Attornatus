@@ -2,6 +2,7 @@ package com.Attornatus.service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,5 +22,9 @@ public class PersonService {
     person.setBirthDate(LocalDate.parse(payload.getBirthDate(), DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 
     return this.repo.save(person);
+  }
+
+  public List<Person> listPerson() {
+    return this.repo.findAll();
   }
 }
