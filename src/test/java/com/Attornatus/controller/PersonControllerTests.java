@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.Attornatus.dto.PersonDto;
+import com.Attornatus.dto.PersonEditDto;
 import com.Attornatus.exception.ErrorMessages;
 import com.Attornatus.model.Person;
 import com.Attornatus.service.PersonService;
@@ -43,13 +44,15 @@ public class PersonControllerTests {
     Person person = new Person();
     person.setName(payload.getName());
     person.setBirthDate(PersonDataExample.getBirthDateFormatted());
+    person.setId(Long.valueOf(1));
     when(this.service.registerPerson(payload)).thenReturn(person);
 
     ResultActions response = this.registerPerson(payload);
 
     response.andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isCreated())
-      .andExpect(jsonPath("$.name").value("Test"));
+      .andExpect(jsonPath("$.name").value("Test"))
+      .andExpect(jsonPath("$.id").value(1));
   }
 
   @Test
@@ -97,7 +100,7 @@ public class PersonControllerTests {
   void should_return_statuscode_400_if_date_format_is_invalid() throws Exception {
     PersonDto payload = new PersonDto();
     payload.setName(PersonDataExample.getName());
-    payload.setBirthDate(PersonDataExample.getBirthDate());
+    payload.setBirthDate("2000/01/01");
 
     when(this.service.registerPerson(payload)).thenThrow(DateTimeParseException.class);
     ResultActions response = this.registerPerson(payload);
@@ -118,11 +121,69 @@ public class PersonControllerTests {
     .andExpect(jsonPath("$.size()").value(0));;
   }
 
+  @Test
+  @DisplayName("Edit person test: name edit test")
+  void name_edit_test() throws Exception {
+    PersonEditDto payload = new PersonEditDto();
+    payload.setName("Test_2");
+
+    Person person = new Person();
+    person.setName(payload.getName());
+    person.setBirthDate(PersonDataExample.getBirthDateFormatted());
+    person.setId(Long.valueOf(1));
+    when(this.service.editPerson(payload, Long.valueOf(1))).thenReturn(person);
+
+    ResultActions response = this.editPerson(payload);
+
+    response.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.name").value("Test_2"))
+      .andExpect(jsonPath("$.id").value(1));
+  }
+
+  @Test
+  @DisplayName("Edit person test: should have status code 400 when name size ie less than three")
+  void name_edit_validation_test() throws Exception {
+    PersonEditDto payload = new PersonEditDto();
+    payload.setName("ab");
+
+    ResultActions response = this.editPerson(payload);
+
+    response.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.message").value(ErrorMessages.nameSize));
+  }
+
+  @Test
+  @DisplayName("Register person test: should have status code 400 when birthdate has invalid format")
+  void birthdate_edit_validation_test() throws Exception {
+    PersonEditDto payload = new PersonEditDto();
+    payload.setBirthDate("2000/01/01");
+
+    when(this.service.editPerson(payload, Long.valueOf(1)))
+      .thenThrow(DateTimeParseException.class);
+
+    ResultActions response = this.editPerson(payload);
+
+    response.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.message").value(ErrorMessages.invalidDateFormat));
+  }
+
   /*
     Register person endpoint method.
   */
   private ResultActions registerPerson(PersonDto payload) throws Exception {
     return this.mock.perform(post("/person")
+    .contentType(MediaType.APPLICATION_JSON)
+    .content(new ObjectMapper().writeValueAsString(payload)));
+  }
+
+  /*
+    Edit person endpoint method.
+  */
+  private ResultActions editPerson(PersonEditDto payload) throws Exception {
+    return this.mock.perform(put("/person/1")
     .contentType(MediaType.APPLICATION_JSON)
     .content(new ObjectMapper().writeValueAsString(payload)));
   }
