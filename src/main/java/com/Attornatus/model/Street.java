@@ -15,6 +15,8 @@ public class Street {
   @Column(name = "street_name")
   private String streetName;
 
+  private String cep;
+
   public Long getId() {
     return id;
   }
@@ -29,5 +31,13 @@ public class Street {
 
   public void setStreetName(String streetName) {
     this.streetName = streetName;
+  }
+
+  public String getCep() {
+    return cep;
+  }
+
+  public void setCep(String cep) {
+    this.cep = cep;
   }
 }
