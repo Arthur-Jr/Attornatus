@@ -13,6 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,21 +35,31 @@ public class PersonServiceTests {
   
   @Mock
   private PersonRepository repo;
+
+  private PersonDto personDto = new PersonDto();
+  private PersonEditDto personEditDto = new PersonEditDto();
+  private Person person = new Person();
+
+  @BeforeEach
+  public void initEach() {
+    this.personDto.setName(PersonDataExample.getName());
+    this.personDto.setBirthDate(PersonDataExample.getBirthDate());
+
+    this.personEditDto.setBirthDate(null);
+    this.personEditDto.setName(null);
+
+    this.person.setName(PersonDataExample.getName());
+    this.person.setBirthDate(PersonDataExample.getBirthDateFormatted());
+    this.person.setId(Long.valueOf(1));
+  }
   
   @Test
   @DisplayName("Register Person test: get personDto and create a Person and return it")
   void should_save_one_Person() {
-    PersonDto payload = new PersonDto();
-    payload.setName(PersonDataExample.getName());
-    payload.setBirthDate(PersonDataExample.getBirthDate());
+    when(this.repo.save(any(Person.class))).thenReturn(this.person);
+    Person createdPerson = this.service.registerPerson(this.personDto);
 
-    Person person = new Person();
-    person.setName(payload.getName());
-    person.setBirthDate(PersonDataExample.getBirthDateFormatted());
-    when(this.repo.save(any(Person.class))).thenReturn(person);
-
-    Person createdPerson = this.service.registerPerson(payload);
-    assertEquals(payload.getName(), createdPerson.getName());
+    assertEquals(this.personDto.getName(), createdPerson.getName());
     assertEquals(PersonDataExample.getBirthDateFormatted(), createdPerson.getBirthDate());
     verify(repo, times(1)).save(any(Person.class));
   }
@@ -56,16 +67,14 @@ public class PersonServiceTests {
   @Test
   @DisplayName("Register Person test: should throw if date format is invalid")
   void should_throw_datetimeException_if_date_format_invalid() {
-    PersonDto payload = new PersonDto();
-    payload.setName(PersonDataExample.getName());
-    payload.setBirthDate("2000/01/01");
+    this.personDto.setBirthDate("2000/01/01");
 
     Throwable exception = assertThrows(DateTimeParseException.class, () -> {
-      this.service.registerPerson(payload);
+      this.service.registerPerson(this.personDto);
     });
 
-    assertEquals("Text '2000/01/01' could not be parsed at index 2", exception.getMessage());
     assertNotNull(exception);
+    assertEquals("Text '2000/01/01' could not be parsed at index 2", exception.getMessage());
     verify(repo, times(0)).save(any(Person.class));
   }
 
@@ -83,22 +92,16 @@ public class PersonServiceTests {
   @Test
   @DisplayName("Edit Person test: name edit test")
   void name_edit_test() {
-    PersonEditDto payload = new PersonEditDto();
-    payload.setName("Test_2");
+    this.personEditDto.setName("Test_2");
+    when(this.repo.getReferenceById(Long.valueOf(1))).thenReturn(this.person);
 
-    Person person = new Person();
-    person.setName(PersonDataExample.getName());
-    person.setBirthDate(PersonDataExample.getBirthDateFormatted());
-    person.setId(Long.valueOf(1));
-    when(this.repo.getReferenceById(Long.valueOf(1))).thenReturn(person);
-
-    person.setName(payload.getName());
+    person.setName(this.personDto.getName());
     when(this.repo.save(person)).thenReturn(person);
+    Person createdPerson = this.service.editPerson(this.personEditDto, Long.valueOf(1));
 
-    Person createdPerson = this.service.editPerson(payload, Long.valueOf(1));
-    assertEquals("Test_2", createdPerson.getName());
+    assertEquals(this.personEditDto.getName(), createdPerson.getName());
     assertEquals(PersonDataExample.getBirthDateFormatted(), createdPerson.getBirthDate());
-    assertEquals(1, createdPerson.getId());
+    assertEquals(this.person.getId(), createdPerson.getId());
     verify(repo, times(1)).save(person);
     verify(repo, times(1)).getReferenceById(Long.valueOf(1));
   }
@@ -106,23 +109,19 @@ public class PersonServiceTests {
   @Test
   @DisplayName("Edit Person test: birthdate edit test")
   void birthdate_edit_test() {
-    PersonEditDto payload = new PersonEditDto();
-    payload.setBirthDate("12/12/2010");
+    this.personEditDto.setBirthDate("12/12/2010");
+    when(this.repo.getReferenceById(Long.valueOf(1))).thenReturn(this.person);
 
-    Person person = new Person();
-    person.setName(PersonDataExample.getName());
-    person.setBirthDate(PersonDataExample.getBirthDateFormatted());
-    person.setId(Long.valueOf(1));
-    when(this.repo.getReferenceById(Long.valueOf(1))).thenReturn(person);
+    LocalDate dateToEdit = LocalDate
+      .parse(this.personEditDto.getBirthDate(), DateTimeFormatter.ofPattern("dd/MM/yyy"));
 
-    LocalDate dateToEdit = LocalDate.parse(payload.getBirthDate(), DateTimeFormatter.ofPattern("dd/MM/yyy"));
-    person.setBirthDate(dateToEdit);
-    when(this.repo.save(person)).thenReturn(person);
+    this.person.setBirthDate(dateToEdit);
+    when(this.repo.save(this.person)).thenReturn(this.person);
+    Person createdPerson = this.service.editPerson(this.personEditDto, Long.valueOf(1));
 
-    Person createdPerson = this.service.editPerson(payload, Long.valueOf(1));
     assertEquals(PersonDataExample.getName(), createdPerson.getName());
     assertEquals(dateToEdit, createdPerson.getBirthDate());
-    assertEquals(1, createdPerson.getId());
+    assertEquals(this.person.getId(), createdPerson.getId());
     verify(repo, times(1)).save(person);
     verify(repo, times(1)).getReferenceById(Long.valueOf(1));
   }
@@ -130,11 +129,10 @@ public class PersonServiceTests {
   @Test
   @DisplayName("Edit Person test: should throw if date format is invalid")
   void should_thow_if_birthdate_format_is_invalid() {
-    PersonEditDto payload = new PersonEditDto();
-    payload.setBirthDate("2010/12/12");
+    this.personEditDto.setBirthDate("2010/12/12");
 
     Throwable exception = assertThrows(DateTimeParseException.class, () -> {
-      this.service.editPerson(payload, Long.valueOf(1));
+      this.service.editPerson(this.personEditDto, Long.valueOf(1));
     });
 
     assertNotNull(exception);
