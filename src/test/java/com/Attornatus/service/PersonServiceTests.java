@@ -97,11 +97,11 @@ public class PersonServiceTests {
 
     person.setName(this.personDto.getName());
     when(this.repo.save(person)).thenReturn(person);
-    Person createdPerson = this.service.editPerson(this.personEditDto, Long.valueOf(1));
+    Person editedPerson = this.service.editPerson(this.personEditDto, Long.valueOf(1));
 
-    assertEquals(this.personEditDto.getName(), createdPerson.getName());
-    assertEquals(PersonDataExample.getBirthDateFormatted(), createdPerson.getBirthDate());
-    assertEquals(this.person.getId(), createdPerson.getId());
+    assertEquals(this.personEditDto.getName(), editedPerson.getName());
+    assertEquals(PersonDataExample.getBirthDateFormatted(), editedPerson.getBirthDate());
+    assertEquals(this.person.getId(), editedPerson.getId());
     verify(repo, times(1)).save(person);
     verify(repo, times(1)).getReferenceById(Long.valueOf(1));
   }
@@ -117,11 +117,11 @@ public class PersonServiceTests {
 
     this.person.setBirthDate(dateToEdit);
     when(this.repo.save(this.person)).thenReturn(this.person);
-    Person createdPerson = this.service.editPerson(this.personEditDto, Long.valueOf(1));
+    Person editedPerson = this.service.editPerson(this.personEditDto, Long.valueOf(1));
 
-    assertEquals(PersonDataExample.getName(), createdPerson.getName());
-    assertEquals(dateToEdit, createdPerson.getBirthDate());
-    assertEquals(this.person.getId(), createdPerson.getId());
+    assertEquals(PersonDataExample.getName(), editedPerson.getName());
+    assertEquals(dateToEdit, editedPerson.getBirthDate());
+    assertEquals(this.person.getId(), editedPerson.getId());
     verify(repo, times(1)).save(person);
     verify(repo, times(1)).getReferenceById(Long.valueOf(1));
   }
