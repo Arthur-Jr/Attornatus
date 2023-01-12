@@ -2,6 +2,7 @@ package com.Attornatus.controller;
 
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,20 +35,28 @@ public class PersonControllerTests {
   @MockBean
   private PersonService service;
 
+  private PersonDto personDto = new PersonDto();
+  private PersonEditDto personEditDto = new PersonEditDto();
+  private Person person = new Person();
+
+  @BeforeEach
+  public void initEach() {
+    this.personDto.setName(PersonDataExample.getName());
+    this.personDto.setBirthDate(PersonDataExample.getBirthDate());
+
+    this.personEditDto.setBirthDate(null);
+    this.personEditDto.setName(null);
+
+    this.person.setName(PersonDataExample.getName());
+    this.person.setBirthDate(PersonDataExample.getBirthDateFormatted());
+    this.person.setId(Long.valueOf(1));
+  }
+
   @Test
   @DisplayName("Register person test: should have status code 201 and return person data on body")
   void should_have_statusCode201_when_person_created() throws Exception {
-    PersonDto payload = new PersonDto();
-    payload.setName(PersonDataExample.getName());
-    payload.setBirthDate(PersonDataExample.getBirthDate());
-
-    Person person = new Person();
-    person.setName(payload.getName());
-    person.setBirthDate(PersonDataExample.getBirthDateFormatted());
-    person.setId(Long.valueOf(1));
-    when(this.service.registerPerson(payload)).thenReturn(person);
-
-    ResultActions response = this.registerPerson(payload);
+    when(this.service.registerPerson(this.personDto)).thenReturn(this.person);
+    ResultActions response = this.registerPerson(this.personDto);
 
     response.andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isCreated())
@@ -58,10 +67,8 @@ public class PersonControllerTests {
   @Test
   @DisplayName("Register person test: should have status code 400 when name is empty")
   void should_return_error_message_when_name_is_empty() throws Exception {
-    PersonDto payload = new PersonDto();
-    payload.setBirthDate(PersonDataExample.getBirthDate());
-
-    ResultActions response = this.registerPerson(payload);
+    this.personDto.setName(null);
+    ResultActions response = this.registerPerson(this.personDto);
 
     response.andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isBadRequest())
@@ -71,11 +78,8 @@ public class PersonControllerTests {
   @Test
   @DisplayName("Register person test: should have status code 400 when name size ie less than three")
   void should_return_error_message_when_name_size_is_less_than_three() throws Exception {
-    PersonDto payload = new PersonDto();
-    payload.setName("ab");
-    payload.setBirthDate(PersonDataExample.getBirthDate());
-
-    ResultActions response = this.registerPerson(payload);
+    this.personDto.setName("ab");
+    ResultActions response = this.registerPerson(this.personDto);
 
     response.andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isBadRequest())
@@ -85,10 +89,8 @@ public class PersonControllerTests {
   @Test
   @DisplayName("Register person test: should have status code 400 when birthdate is empty")
   void should_return_error_message_when_birthdate_is_empty() throws Exception {
-    PersonDto payload = new PersonDto();
-    payload.setName(PersonDataExample.getName());
-
-    ResultActions response = this.registerPerson(payload);
+    this.personDto.setBirthDate(null);
+    ResultActions response = this.registerPerson(this.personDto);
 
     response.andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isBadRequest())
@@ -98,12 +100,10 @@ public class PersonControllerTests {
   @Test
   @DisplayName("Register person test: should have status code 400 when birthdate has invalid format")
   void should_return_statuscode_400_if_date_format_is_invalid() throws Exception {
-    PersonDto payload = new PersonDto();
-    payload.setName(PersonDataExample.getName());
-    payload.setBirthDate("2000/01/01");
+    this.personDto.setBirthDate("2000/01/01");
 
-    when(this.service.registerPerson(payload)).thenThrow(DateTimeParseException.class);
-    ResultActions response = this.registerPerson(payload);
+    when(this.service.registerPerson(this.personDto)).thenThrow(DateTimeParseException.class);
+    ResultActions response = this.registerPerson(this.personDto);
 
     response.andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isBadRequest())
@@ -124,16 +124,11 @@ public class PersonControllerTests {
   @Test
   @DisplayName("Edit person test: name edit test")
   void name_edit_test() throws Exception {
-    PersonEditDto payload = new PersonEditDto();
-    payload.setName("Test_2");
+    this.personEditDto.setName("Test_2");
 
-    Person person = new Person();
-    person.setName(payload.getName());
-    person.setBirthDate(PersonDataExample.getBirthDateFormatted());
-    person.setId(Long.valueOf(1));
-    when(this.service.editPerson(payload, Long.valueOf(1))).thenReturn(person);
-
-    ResultActions response = this.editPerson(payload);
+    this.person.setName(this.personEditDto.getName());
+    when(this.service.editPerson(this.personEditDto, Long.valueOf(1))).thenReturn(person);
+    ResultActions response = this.editPerson(this.personEditDto);
 
     response.andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
@@ -144,10 +139,8 @@ public class PersonControllerTests {
   @Test
   @DisplayName("Edit person test: should have status code 400 when name size ie less than three")
   void name_edit_validation_test() throws Exception {
-    PersonEditDto payload = new PersonEditDto();
-    payload.setName("ab");
-
-    ResultActions response = this.editPerson(payload);
+    this.personEditDto.setName("ab");
+    ResultActions response = this.editPerson(this.personEditDto);
 
     response.andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isBadRequest())
@@ -155,15 +148,14 @@ public class PersonControllerTests {
   }
 
   @Test
-  @DisplayName("Register person test: should have status code 400 when birthdate has invalid format")
+  @DisplayName("Edit person test: should have status code 400 when birthdate has invalid format")
   void birthdate_edit_validation_test() throws Exception {
-    PersonEditDto payload = new PersonEditDto();
-    payload.setBirthDate("2000/01/01");
+    this.personEditDto.setBirthDate("2000/01/01");
 
-    when(this.service.editPerson(payload, Long.valueOf(1)))
+    when(this.service.editPerson(this.personEditDto, Long.valueOf(1)))
       .thenThrow(DateTimeParseException.class);
 
-    ResultActions response = this.editPerson(payload);
+    ResultActions response = this.editPerson(this.personEditDto);
 
     response.andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isBadRequest())
