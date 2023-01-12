@@ -1,10 +1,24 @@
 package com.Attornatus.dto;
 
+import com.Attornatus.exception.ErrorMessages;
+
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
+
 public class AddressDto {
+  @NotEmpty(message = ErrorMessages.emptyNumber)
   private int number;
+
   private boolean principal = false;
+
+  @NotEmpty(message = ErrorMessages.emptyCity)
   private String city;
+
+  @NotEmpty(message = ErrorMessages.emptyStreet)
   private String street;
+
+  @NotEmpty(message = ErrorMessages.emptyCep)
+  @Size(max = 8, min = 8, message = ErrorMessages.cepSize)
   private String cep;
 
   public int getNumber() {
