@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.Attornatus.dto.AddressDto;
+import com.Attornatus.exception.AddressNotFoundException;
 import com.Attornatus.exception.ErrorMessages;
 import com.Attornatus.exception.InvalidCepException;
 import com.Attornatus.model.Address;
@@ -83,15 +84,13 @@ public class AddressSerivceTest {
     this.address.setId(Long.valueOf(1));
     this.address.setPerson(person);
     this.address.setStreet(street);
-
-    // Repositories default mocks:
-    when(this.personService.findPersonById(Long.valueOf(1))).thenReturn(this.person);
-    when(this.addressRepo.findAllByPerson(person)).thenReturn(new ArrayList<Address>());
   }
 
   @Test
   @DisplayName("Add address test: should save new address, new city and street")
   void should_save_a_new_address_city_and_street() throws Exception {
+    when(this.personService.findPersonById(Long.valueOf(1))).thenReturn(this.person);
+    when(this.addressRepo.findAllByPerson(person)).thenReturn(new ArrayList<Address>());
     this.findCityStreet(null, null);
     this.saveAddressMock(this.address);
     this.saveCityMock();
@@ -111,6 +110,8 @@ public class AddressSerivceTest {
   @Test
   @DisplayName("Add address test: should save a new address using a existing city")
   void should_save_a_new_address_and_street_and_use_a_city_that_already_exists() throws Exception {
+    when(this.personService.findPersonById(Long.valueOf(1))).thenReturn(this.person);
+    when(this.addressRepo.findAllByPerson(person)).thenReturn(new ArrayList<Address>());
     this.findCityStreet(this.city, null);
     this.saveAddressMock(this.address);
     this.saveStreetMock();
@@ -128,6 +129,8 @@ public class AddressSerivceTest {
   @Test
   @DisplayName("Add address test: should save a new address using a existing city")
   void should_save_a_new_address_and_city_and_use_a_street_that_already_exists() throws Exception {
+    when(this.personService.findPersonById(Long.valueOf(1))).thenReturn(this.person);
+    when(this.addressRepo.findAllByPerson(person)).thenReturn(new ArrayList<Address>());
     this.findCityStreet(null, this.street);
     this.saveAddressMock(this.address);
     this.saveCityMock();
@@ -145,6 +148,8 @@ public class AddressSerivceTest {
   @Test
   @DisplayName("Add address test: should throw an exception when CEP is invalid")
   void should_throw_when_cep_is_invalid() throws Exception {
+    when(this.personService.findPersonById(Long.valueOf(1))).thenReturn(this.person);
+    when(this.addressRepo.findAllByPerson(person)).thenReturn(new ArrayList<Address>());
     when(this.cityRepo.findByCityName(anyString())).thenReturn(this.city);
     this.addressDto.setCep("abcdefgh");
 
@@ -167,6 +172,7 @@ public class AddressSerivceTest {
   void should_change_principal_id_to_the_new_one() throws Exception {
     List<Address> addressList = new ArrayList<>();
     addressList.add(this.address);
+    when(this.personService.findPersonById(Long.valueOf(1))).thenReturn(this.person);
     when(this.addressRepo.findAllByPerson(person)).thenReturn(addressList);
 
     AddressDto newAddressDto = new AddressDto();
@@ -202,6 +208,7 @@ public class AddressSerivceTest {
   void should_return_address_list_of_the_person() {
     List<Address> addressList = new ArrayList<>();
     addressList.add(this.address);
+    when(this.personService.findPersonById(Long.valueOf(1))).thenReturn(this.person);
     when(this.addressRepo.findAllByPerson(this.person)).thenReturn(addressList);
 
     List<Address> addresses = this.service.findAllAddressByPersonId(Long.valueOf(1));
@@ -210,6 +217,29 @@ public class AddressSerivceTest {
     assertEquals(addressList, addresses);
     verify(this.addressRepo, times(1)).findAllByPerson(any(Person.class));
     verify(this.personService, times(1)).findPersonById(anyLong());
+  }
+
+  @Test
+  @DisplayName("Find by id: Should throw if address not find")
+  void should_throw_if_address_not_found() throws Exception {
+    Throwable exception = assertThrows(AddressNotFoundException.class, () -> {
+      this.service.findAddresById(Long.valueOf(1));
+    });
+
+    assertNotNull(exception);
+    assertEquals(ErrorMessages.AddressNotFound, exception.getMessage());
+    verify(this.addressRepo, times(1)).getReferenceById(Long.valueOf(1));
+  }
+
+  @Test
+  @DisplayName("Find by id: Should return the selected address")
+  void should_return_the_selected_address() throws Exception {
+    when(this.addressRepo.getReferenceById(anyLong())).thenReturn(this.address);
+    Address address = this.service.findAddresById(Long.valueOf(1));
+
+    assertNotNull(address);
+    assertEquals(this.address, address);
+    verify(this.addressRepo, times(1)).getReferenceById(Long.valueOf(1));
   }
 
   private void saveCityMock() {
