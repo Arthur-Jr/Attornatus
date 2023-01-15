@@ -39,8 +39,8 @@ public class AdviceManager {
   }
 
   @ExceptionHandler(PersonNotFoundException.class)
-  public ResponseEntity<DataError> handleRepeatedAddress(Exception e) {
-    DataError errorResponse = new DataError(e.getMessage());
+  public ResponseEntity<DataError> handleRepeatedAddress(PersonNotFoundException e) {
+    DataError errorResponse = new DataError(ErrorMessages.PersonNotFound);
 
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
   }
