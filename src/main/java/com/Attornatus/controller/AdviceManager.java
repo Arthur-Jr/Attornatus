@@ -59,4 +59,11 @@ public class AdviceManager {
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
   }
+
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<DataError> handleInternalError(Exception e) {
+    DataError errorResponse = new DataError(ErrorMessages.InternalServer);
+
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+  }
 }

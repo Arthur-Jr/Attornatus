@@ -17,4 +17,6 @@ public class ErrorMessages {
 
   public static final String PersonNotFound = "Person not found!";
   public static final String AddressNotFound = "Address not found!";
+
+  public static final String InternalServer = "Internal server error";
 }
