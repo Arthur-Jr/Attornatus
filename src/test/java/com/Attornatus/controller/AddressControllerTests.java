@@ -20,6 +20,10 @@ import com.Attornatus.util.AddressDataExample;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @WebMvcTest(AddressController.class)
@@ -101,6 +105,19 @@ public class AddressControllerTests {
     response.andExpect(content().contentType(MediaType.APPLICATION_JSON))
     .andExpect(status().isBadRequest())
     .andExpect(jsonPath("$.message").value(ErrorMessages.emptyNumber));
+  }
+
+  @Test
+  @DisplayName("Find Address by person tests: should return Address list from person")
+  void should_return_address_list_of_the_person() throws Exception {
+    List<Address> addressList = new ArrayList<>();
+    addressList.add(this.address);
+    when(this.service.findAllAddressByPersonId(Long.valueOf(1))).thenReturn(addressList);
+
+    this.mock.perform(get("/address/person/1"))
+      .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.size()").value(1));
   }
 
   private ResultActions addNewAddress(AddressDto payload) throws Exception {

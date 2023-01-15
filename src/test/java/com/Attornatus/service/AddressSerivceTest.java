@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -194,6 +195,21 @@ public class AddressSerivceTest {
     verify(this.streetRepo, times(0)).save(any(Street.class));
     verify(this.addressRepo, times(2)).save(any(Address.class));
     assertEquals(newAddress, addressAdded);
+  }
+
+  @Test
+  @DisplayName("Find Address by person tests: should return Address list from person")
+  void should_return_address_list_of_the_person() {
+    List<Address> addressList = new ArrayList<>();
+    addressList.add(this.address);
+    when(this.addressRepo.findAllByPerson(this.person)).thenReturn(addressList);
+
+    List<Address> addresses = this.service.findAllAddressByPersonId(Long.valueOf(1));
+
+    assertEquals(1, addresses.size());
+    assertEquals(addressList, addresses);
+    verify(this.addressRepo, times(1)).findAllByPerson(any(Person.class));
+    verify(this.personService, times(1)).findPersonById(anyLong());
   }
 
   private void saveCityMock() {
