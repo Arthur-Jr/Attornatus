@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.Attornatus.dto.AddressDto;
+import com.Attornatus.exception.AddressNotFoundException;
 import com.Attornatus.exception.ErrorMessages;
 import com.Attornatus.model.Address;
 import com.Attornatus.service.AddressService;
@@ -118,6 +119,28 @@ public class AddressControllerTests {
       .andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.size()").value(1));
+  }
+
+  @Test
+  @DisplayName("Find by id: should throw not found if the address is not on DB")
+  void should_throw_if_address_is_not_on_db() throws Exception {
+    when(this.service.findAddresById(Long.valueOf(1)))
+      .thenThrow(AddressNotFoundException.class);
+    
+    this.mock.perform(get("/address/1"))
+      .andExpect(status().isNotFound())
+      .andExpect(jsonPath("$.message").value(ErrorMessages.AddressNotFound));
+  }
+
+  @Test
+  @DisplayName("Find by id: should return the Address")
+  void should_return_the_selected_address() throws Exception {
+    when(this.service.findAddresById(Long.valueOf(1)))
+      .thenReturn(this.address);
+    
+    this.mock.perform(get("/address/1"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.number").value(this.address.getNumber()));
   }
 
   private ResultActions addNewAddress(AddressDto payload) throws Exception {
