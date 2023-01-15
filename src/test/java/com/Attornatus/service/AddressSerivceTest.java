@@ -242,6 +242,33 @@ public class AddressSerivceTest {
     verify(this.addressRepo, times(1)).getReferenceById(Long.valueOf(1));
   }
 
+  @Test
+  void test() {
+    Address addressToPrincipal = new Address();
+    addressToPrincipal.setNumber(2);
+    addressToPrincipal.setPrincipal(false);
+    addressToPrincipal.setId(Long.valueOf(2));
+    addressToPrincipal.setPerson(this.person);
+    addressToPrincipal.setStreet(this.street);
+
+    List<Address> addressList = new ArrayList<>();
+    addressList.add(this.address);
+    addressList.add(addressToPrincipal);
+
+    when(this.addressRepo.getReferenceById(Long.valueOf(2))).thenReturn(addressToPrincipal);
+    when(this.addressRepo.findAllByPerson(this.person)).thenReturn(addressList);
+    when(this.addressRepo.save(this.address)).thenReturn(this.address);
+    when(this.addressRepo.save(addressToPrincipal)).thenReturn(addressToPrincipal);
+
+    Address addressEdited = this.service.changePrincipalAddress(Long.valueOf(2));
+
+    verify(this.addressRepo, times(1)).getReferenceById(Long.valueOf(2));
+    verify(this.addressRepo, times(1)).findAllByPerson(any(Person.class));
+    verify(this.addressRepo, times(1)).save(this.address);
+    verify(this.addressRepo, times(1)).save(addressToPrincipal);
+    assertEquals(true, addressEdited.isPrincipal());
+  }
+
   private void saveCityMock() {
     when(this.cityRepo.save(any(City.class))).thenReturn(this.city);
   }

@@ -128,6 +128,7 @@ public class AddressControllerTests {
       .thenThrow(AddressNotFoundException.class);
     
     this.mock.perform(get("/address/1"))
+      .andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isNotFound())
       .andExpect(jsonPath("$.message").value(ErrorMessages.AddressNotFound));
   }
@@ -139,8 +140,24 @@ public class AddressControllerTests {
       .thenReturn(this.address);
     
     this.mock.perform(get("/address/1"))
+      .andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.number").value(this.address.getNumber()));
+  }
+
+  @Test
+  @DisplayName("Edit address: Should return status code 200 if the principal status was changed")
+  void should_return_status_200_if_principal_was_changed() throws Exception {
+    when(this.service.changePrincipalAddress(Long.valueOf(1)))
+      .thenReturn(this.address);
+    
+    this.address.setPrincipal(true);
+
+    this.mock.perform(put("/address/1"))
+      .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.number").value(this.address.getNumber()))
+      .andExpect(jsonPath("$.principal").value(true));
   }
 
   private ResultActions addNewAddress(AddressDto payload) throws Exception {
