@@ -11,4 +11,9 @@ public class ErrorMessages {
   public static final String emptyStreet = "Address street name is required!";
   public static final String emptyCep = "Address CEP is required!";
   public static final String cepSize = "Address CEP must have 8 characters!";
+  public static final String invalidCep = "Invalid CEP! CEP ex: 12345678";
+
+  public static final String addressAlreadyRegistred = "There already an address with this number in this street!";
+
+  public static final String PersonNotFound = "Person not found!";
 }
