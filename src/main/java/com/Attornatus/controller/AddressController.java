@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,8 +33,19 @@ public class AddressController {
       .body(this.service.addNewAddress(address, id));
   }
 
-  @GetMapping("/person/{id}")
-  public List<Address> findAllAddressByPersonId(@PathVariable Long id) {
-    return this.service.findAllAddressByPersonId(id);
+  @GetMapping("/person/{personId}")
+  public List<Address> findAllAddressByPersonId(@PathVariable Long personId) {
+    return this.service.findAllAddressByPersonId(personId);
+  }
+
+  @GetMapping("/{addressId}")
+  public ResponseEntity<Address> findAddresById(@PathVariable Long addressId) {
+    return ResponseEntity.status(HttpStatus.OK)
+      .body(this.service.findAddresById(addressId));
+  }
+
+  @PutMapping("/{addressId}")
+  public ResponseEntity<Address> changePrincipalAddress(@PathVariable Long addressId) {
+    return ResponseEntity.ok(this.service.changePrincipalAddress(addressId));
   }
 }

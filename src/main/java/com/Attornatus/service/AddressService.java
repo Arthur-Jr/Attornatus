@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.Attornatus.dto.AddressDto;
+import com.Attornatus.exception.AddressNotFoundException;
 import com.Attornatus.exception.InvalidCepException;
 import com.Attornatus.model.Address;
 import com.Attornatus.model.City;
@@ -53,6 +54,25 @@ public class AddressService {
   public List<Address> findAllAddressByPersonId(Long personId) {
     Person person = this.personService.findPersonById(personId);
     return this.addressRepo.findAllByPerson(person);
+  }
+
+  public Address findAddresById(Long addressId) {
+    Address address = this.addressRepo.getReferenceById(addressId);
+
+    if (address == null) {
+      throw new AddressNotFoundException();
+    }
+
+    return address;
+  }
+
+  public Address changePrincipalAddress(Long addressId) {
+    Address address = this.findAddresById(addressId);
+    List<Address> addressList = this.addressRepo.findAllByPerson(address.getPerson());
+    this.changePrincipalAddress(addressList);
+
+    address.setPrincipal(true);
+    return this.addressRepo.save(address);
   }
 
   private void changePrincipalAddress(List<Address> addressList) {
