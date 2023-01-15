@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +25,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.Attornatus.dto.PersonDto;
 import com.Attornatus.dto.PersonEditDto;
+import com.Attornatus.exception.ErrorMessages;
+import com.Attornatus.exception.PersonNotFoundException;
 import com.Attornatus.model.Person;
 import com.Attornatus.repository.PersonRepository;
 import com.Attornatus.util.PersonDataExample;
@@ -139,5 +143,28 @@ public class PersonServiceTests {
     assertEquals("Text '2010/12/12' could not be parsed at index 2", exception.getMessage());
     verify(repo, times(0)).save(any(Person.class));
     verify(repo, times(1)).getReferenceById(Long.valueOf(1));
+  }
+
+  @Test
+  @DisplayName("Find by id: Should throw if person not find")
+  void should_throw_if_person_not_found() throws Exception {
+    Throwable exception = assertThrows(PersonNotFoundException.class, () -> {
+      this.service.findPersonById(Long.valueOf(1));
+    });
+
+    assertNotNull(exception);
+    assertEquals(ErrorMessages.PersonNotFound, exception.getMessage());
+    verify(this.repo, times(1)).findById(Long.valueOf(1));
+  }
+
+  @Test
+  @DisplayName("Find by id: Should return the selected person")
+  void should_return_the_selected_person() throws Exception {    
+    doReturn(Optional.of(this.person)).when(this.repo).findById(Long.valueOf(1));
+    Person addedPerson = this.service.findPersonById(Long.valueOf(1));
+
+    assertNotNull(addedPerson);
+    assertEquals(this.person, addedPerson);
+    verify(this.repo, times(1)).findById(Long.valueOf(1));
   }
 }
