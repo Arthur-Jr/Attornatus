@@ -9,6 +9,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.Attornatus.exception.AddressNotFoundException;
 import com.Attornatus.exception.DataError;
 import com.Attornatus.exception.ErrorMessages;
 import com.Attornatus.exception.InvalidCepException;
@@ -39,8 +40,15 @@ public class AdviceManager {
   }
 
   @ExceptionHandler(PersonNotFoundException.class)
-  public ResponseEntity<DataError> handleRepeatedAddress(PersonNotFoundException e) {
+  public ResponseEntity<DataError> handleNotFoundPerson(PersonNotFoundException e) {
     DataError errorResponse = new DataError(ErrorMessages.PersonNotFound);
+
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+  }
+
+  @ExceptionHandler(AddressNotFoundException.class)
+  public ResponseEntity<DataError> handleNotFoundAddress(AddressNotFoundException e) {
+    DataError errorResponse = new DataError(ErrorMessages.AddressNotFound);
 
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
   }

@@ -16,4 +16,5 @@ public class ErrorMessages {
   public static final String addressAlreadyRegistred = "There already an address with this number in this street!";
 
   public static final String PersonNotFound = "Person not found!";
+  public static final String AddressNotFound = "Address not found!";
 }
