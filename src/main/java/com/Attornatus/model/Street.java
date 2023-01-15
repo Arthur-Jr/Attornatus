@@ -14,9 +14,10 @@ public class Street {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "street_name")
+  @Column(name = "street_name", unique = true)
   private String streetName;
 
+  @Column(unique = true)
   private String cep;
 
   @ManyToOne
