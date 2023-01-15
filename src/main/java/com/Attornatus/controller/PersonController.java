@@ -45,4 +45,9 @@ public class PersonController {
       .contentType(MediaType.APPLICATION_JSON)
       .body(this.service.editPerson(person, id));
   }
+
+  @GetMapping("/{id}")
+  public Person findPersonById(@PathVariable Long id) {
+    return this.service.findPersonById(id);
+  }
 }

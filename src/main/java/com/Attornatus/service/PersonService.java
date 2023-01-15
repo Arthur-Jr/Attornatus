@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.Attornatus.dto.PersonDto;
 import com.Attornatus.dto.PersonEditDto;
+import com.Attornatus.exception.PersonNotFoundException;
 import com.Attornatus.model.Person;
 import com.Attornatus.repository.PersonRepository;
 
@@ -41,5 +42,15 @@ public class PersonService {
     }
 
     return this.repo.save(personToEdit);
+  }
+
+  public Person findPersonById(Long id) {
+    Person person = this.repo.findById(id).orElse(null);
+
+    if (person == null) {
+      throw new PersonNotFoundException();
+    }
+
+    return person;
   }
 }

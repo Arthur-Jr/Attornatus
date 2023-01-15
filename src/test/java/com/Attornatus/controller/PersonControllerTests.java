@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.Attornatus.dto.PersonDto;
 import com.Attornatus.dto.PersonEditDto;
 import com.Attornatus.exception.ErrorMessages;
+import com.Attornatus.exception.PersonNotFoundException;
 import com.Attornatus.model.Person;
 import com.Attornatus.service.PersonService;
 import com.Attornatus.util.PersonDataExample;
@@ -160,6 +161,28 @@ public class PersonControllerTests {
     response.andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.message").value(ErrorMessages.invalidDateFormat));
+  }
+
+  @Test
+  @DisplayName("Find by id: should throw not found if the person is not on DB")
+  void should_throw_if_person_is_not_on_db() throws Exception {
+    when(this.service.findPersonById(Long.valueOf(1)))
+      .thenThrow(PersonNotFoundException.class);
+    
+    this.mock.perform(get("/person/1"))
+      .andExpect(status().isNotFound())
+      .andExpect(jsonPath("$.message").value(ErrorMessages.PersonNotFound));
+  }
+
+  @Test
+  @DisplayName("Find by id: should return the person")
+  void should_return_the_selected_person() throws Exception {
+    when(this.service.findPersonById(Long.valueOf(1)))
+      .thenReturn(this.person);
+    
+    this.mock.perform(get("/person/1"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.name").value(this.person.getName()));
   }
 
   /*
