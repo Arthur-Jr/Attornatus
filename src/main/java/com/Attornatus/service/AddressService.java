@@ -50,6 +50,11 @@ public class AddressService {
     return this.addressRepo.save(address);
   }
 
+  public List<Address> findAllAddressByPersonId(Long personId) {
+    Person person = this.personService.findPersonById(personId);
+    return this.addressRepo.findAllByPerson(person);
+  }
+
   private void changePrincipalAddress(List<Address> addressList) {
     Address addressToChange = addressList.stream()
       .filter(x -> x.isPrincipal() == true)
