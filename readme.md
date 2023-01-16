@@ -2,6 +2,18 @@
 
 Foi desenvolvido um gerenciador de pessoas e endereços.
 
+## Resposta do teste:
+
+Q= Durante a implementação de uma nova funcionalidade de software solicitada, quais critérios você avalia e implementa para garantia de qualidade de software?
+
+R= Primeiro eu tento entender qual o objetivo da nova funcionalidade e como ela vai funcionar com front, para assim poder desenvolve-la da melhor maneira tanto pro back quanto pro front. E tecnicamente com testes de integração e unitários.
+
+<br>
+
+Q= Em qual etapa da implementação você considera a qualidade de software?
+
+R= Desde do inicio do desenvolvimento do mesmo, normalmente fazendo testes unitários enquanto vou implementando o software. 
+
 <br>
 
 ## Técnologias usadas
